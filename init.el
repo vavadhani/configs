@@ -16,6 +16,14 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
+(unless (package-installed-p 'projectile)
+  (package-refresh-contents)
+  (package-install 'projectile))
+
+(unless (package-installed-p 'company)
+  (package-refresh-contents)
+  (package-install 'company))
+
 ;;;
 ;;; JAVA
 ;;;
@@ -39,6 +47,10 @@
 (unless (package-installed-p 'helm)
   (package-refresh-contents)
   (package-install 'helm))
+
+(unless (package-installed-p 'java-imports)
+  (package-refresh-contents)
+  (package-install 'java-imports))
 
 (require 'lsp)
 (require 'lsp-java)
