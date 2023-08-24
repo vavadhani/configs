@@ -1,9 +1,27 @@
+(add-to-list 'load-path "~/.emacs.d/styles/")
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(custom-enabled-themes '(wombat))
+ '(ispell-dictionary nil)
+ '(package-selected-packages
+   '(clang-format+ google-c-style gited flycheck lsp-ui rustic java-imports helm-lsp which-key yasnippet lsp-java company projectile use-package))
+ '(projectile-mode t nil (projectile))
+ '(show-paren-mode t))
+
 (setq-default buffer-file-coding-system 'utf-8-unix)
 (setq-default indent-tabs-mode nil)
+(setq-default column-number-mode t)
+(setq-default display-line-numbers t)
 
 (add-hook 'before-save-hook 'whitespace-cleanup)
 
 (add-hook 'after-init-hook 'global-company-mode)
+(add-hook 'after-init-hook 'helm-mode)
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "http://melpa.org/packages/"))
@@ -54,7 +72,7 @@
 
 (require 'lsp)
 (require 'lsp-java)
-(add-hook 'java-mode-hook #'lsp)
+;(add-hook 'java-mode-hook #'lsp)
 (require 'projectile)
 
 (condition-case nil
@@ -96,8 +114,23 @@
 ;; See customization below for where to put java imports
 (setq java-imports-find-block-function 'java-imports-find-place-sorted-block)
 
+(require 'google-java-format)
+
+(global-set-key (kbd "C-M-i") #'google-java-format-region)
+
 (add-hook 'java-mode-hook 'java-imports-scan-file)
 
+;;;;
+;;;; Google CPP
+;;;;
+(unless (package-installed-p 'google-c-sytle)
+  (package-refresh-contents)
+  (package-install 'google-c-style))
+
+(require 'cc-mode)
+(require 'google-c-style)
+(add-hook 'c-mode-common-hook 'google-set-c-style)
+(add-hook 'c-mode-common-hook 'google-make-newline-indent)
 
 ;;;;
 ;;;; RUST
@@ -152,6 +185,26 @@
   (lsp-ui-sideline-show-hover t)
   (lsp-ui-doc-enable nil))
 
+(use-package lsp-mode
+  :ensure
+  :commands lsp
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  :config
+  (add-hook 'lsp-mode-hook 'lsp-ui-mode))
+
+(use-package lsp-ui
+  :ensure
+  :commands lsp-ui-mode
+  :custom
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-doc-enable nil))
+
 (use-package company
   :ensure
   :custom
@@ -167,21 +220,8 @@
 (use-package flycheck :ensure)
 
 (setq lsp-rust-analyzer-server-display-inlay-hints t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-faces-vector
-   [default default default italic underline success warning error])
- '(custom-enabled-themes '(wombat))
- '(package-selected-packages
-   '(treemacs-projectile webfeeder helm-lsp which-key yasnippet lsp-java git gerrit projectile nhexl-mode company dumb-jump use-package rustic lsp-ui flycheck))
- '(projectile-mode t nil (projectile))
- '(show-paren-mode t))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+;;;
+;;; C/CPP
+;;;
+(setq c-default-style "k&r" c-basic-offset 4)
